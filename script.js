@@ -29,9 +29,9 @@
   function sideCannons(duration = 2500, colors = COLORS) {
     const end = Date.now() + duration;
     (function frame() {
-      fire({ particleCount: 4, angle: 60, spread: 60, startVelocity: 60, origin: { x: 0, y: 0.75 }, colors });
-      fire({ particleCount: 4, angle: 120, spread: 60, startVelocity: 60, origin: { x: 1, y: 0.75 }, colors });
-      if (Date.now() < end) setTimeout(frame, 16);
+      fire({ particleCount: 3, angle: 60, spread: 60, startVelocity: 60, origin: { x: 0, y: 0.75 }, colors, ticks: 150 });
+      fire({ particleCount: 3, angle: 120, spread: 60, startVelocity: 60, origin: { x: 1, y: 0.75 }, colors, ticks: 150 });
+      if (Date.now() < end) setTimeout(frame, 45);
     })();
   }
 
@@ -44,7 +44,7 @@
     for (let i = 0; i < times; i++) {
       setTimeout(() => {
         fire({
-          particleCount: 70,
+          particleCount: 40,
           spread: 360,
           startVelocity: 32,
           ticks: 80,
@@ -153,7 +153,6 @@
 
   // Başta sahnede sadece taçlı Hikmet var
   function spawnHero() {
-    if (cfg.toon) document.body.classList.add("toon");
     heroEl = makeChar(cfg.hero || {}, { hero: true, face: "🥳", x: 50, enter: "enter-d", delay: 0.2 });
     $("#stage").appendChild(heroEl);
   }
@@ -298,7 +297,7 @@
     shake();
     fireworks(6);
     sideCannons(2000);
-    setTimeout(() => emojiRain(35), 300);
+    setTimeout(() => emojiRain(22), 300);
     await sleep(400);
     $(".cake-wrap").hidden = true;
     startConcert();
@@ -370,6 +369,10 @@
     crewEls.forEach((ch, i) => (ch.style.left = `${FORMATIONS[f][i]}%`));
   }
 
+  const BEAT_HEAD = [{ transform: "scale(1.18)" }, { transform: "scale(1)" }];
+  const BEAT_POP = [{ scale: "1.05" }, { scale: "1" }];
+  const pulse = (el, frames) => el && el.animate && el.animate(frames, { duration: 260, easing: "ease-out" });
+
   function onBeat() {
     if (phase !== "concert") return;
     beatCount++;
@@ -377,10 +380,10 @@
 
     crewEls.forEach((ch) => {
       ch.style.marginLeft = `${step}px`; // sağ-sol adım
-      restartClass(ch, "beat");
+      pulse(ch.querySelector(".char-head"), BEAT_HEAD);
     });
-    restartClass($("#title"), "beat");
-    restartClass($("#photoHeart"), "beat");
+    pulse($("#title"), BEAT_POP);
+    pulse($("#photoHeart"), BEAT_POP);
 
     // Her 4 vuruşta hepsi aynı hareket
     if (beatCount % 4 === 0) {
@@ -763,7 +766,8 @@
     const yMax = Math.max(...ys);
     const yMid = (yMin + yMax) / 2;
 
-    const size = Math.min(W * 0.22, H * 0.3, ((W * 2.75) / items.length) * 1.05);
+    // Kalp resimlerinin kenarında gölge payı var, biraz üst üste binmeleri sorun değil
+    const size = Math.min(W * 0.3, H * 0.38, ((W * 2.75) / items.length) * 1.4);
     const scale = Math.min((W - size) / 32, (H - size) / (yMax - yMin));
     items.forEach((el) => {
       el.style.setProperty("--size", `${size}px`);
@@ -786,7 +790,7 @@
   const CONCERT_EMOJI = ["🩷", "💖", "🎤", "🎀", "💅", "✨", "🌸"];
 
   function spawnFloater() {
-    if (document.hidden || floaters.childElementCount > 22) return;
+    if (document.hidden || floaters.childElementCount > 12) return;
     const roll = Math.random();
     let el;
     if (roll < 0.3) {
@@ -846,7 +850,7 @@
       requestAnimationFrame(fitCake);
       setTimeout(fitCake, 1400); // yazı tipi yüklendikten sonra tekrar
       sideCannons(2000);
-      setInterval(spawnFloater, 800);
+      setInterval(spawnFloater, 1200);
       setTimeout(startAmbient, 2500);
 
       phase = "cake";

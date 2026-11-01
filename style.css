@@ -28,7 +28,7 @@ html, body {
 body {
   font-family: "Quicksand", system-ui, sans-serif;
   color: var(--text);
-  background: radial-gradient(ellipse at top, var(--bg-3) 0%, var(--bg-2) 45%, var(--bg-1) 100%) fixed;
+  background: radial-gradient(ellipse at top, var(--bg-3) 0%, var(--bg-2) 45%, var(--bg-1) 100%);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -52,10 +52,10 @@ body {
   width: 70vmax;
   height: 130vh;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 85%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 85%);
   clip-path: polygon(47% 0, 53% 0, 100% 100%, 0 100%);
   transform-origin: 50% 0;
-  mix-blend-mode: soft-light;
+  will-change: transform;
   opacity: 0;
   transition: opacity 1s;
 }
@@ -135,7 +135,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   width: 1px; height: 70px;
   background: rgba(255, 255, 255, 0.5);
 }
-.photo-float { width: 60px; height: 60px; clip-path: url(#heartClip); object-fit: cover; opacity: 0.5; }
+.photo-float { width: 60px; height: 60px; object-fit: contain; opacity: 0.6; }
 
 /* ---------- Açılış ---------- */
 #gate {
@@ -266,32 +266,9 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   animation: wobble 2.6s ease-in-out infinite;
 }
 .title .name { color: var(--gold); display: inline-block; animation: nameZoom 1.3s ease-in-out infinite; }
-.title::before, .title::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  white-space: pre-line;
-  text-shadow: none;
-  opacity: 0;
-  pointer-events: none;
-}
-.title::before { color: #00f0ff; animation: glitchA 3.2s steps(1) infinite; }
-.title::after { color: #ff2d75; animation: glitchB 3.2s steps(1) infinite; }
 
 @keyframes wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
 @keyframes nameZoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12) rotate(-3deg); } }
-@keyframes glitchA {
-  0%, 86%, 100% { opacity: 0; }
-  87% { opacity: 0.85; transform: translate(-5px, 2px); clip-path: inset(10% 0 55% 0); }
-  90% { opacity: 0.85; transform: translate(4px, -2px); clip-path: inset(60% 0 8% 0); }
-  93% { opacity: 0.85; transform: translate(-3px, 0); clip-path: inset(35% 0 35% 0); }
-}
-@keyframes glitchB {
-  0%, 87%, 100% { opacity: 0; }
-  88% { opacity: 0.85; transform: translate(5px, -1px); clip-path: inset(50% 0 20% 0); }
-  91% { opacity: 0.85; transform: translate(-4px, 2px); clip-path: inset(5% 0 70% 0); }
-  94% { opacity: 0.85; transform: translate(3px, 1px); clip-path: inset(70% 0 5% 0); }
-}
 
 .title.beat { animation: beatPop 0.25s ease-out; }
 @keyframes beatPop { from { transform: scale(1.08); } to { transform: scale(1); } }
@@ -427,7 +404,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   text-shadow: 3px 3px 0 var(--ink);
   animation: micPulse 1s ease-in-out infinite;
 }
-@keyframes micPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12) rotate(-2deg); color: var(--gold); } }
+@keyframes micPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12) rotate(-2deg); } }
 
 /* ---------- Karakterler ---------- */
 .stage { position: absolute; left: 0; right: 0; bottom: 0; height: var(--stage-h); z-index: 3; pointer-events: none; }
@@ -487,7 +464,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 @keyframes enterRight { from { transform: translateX(100vw); } to { transform: none; } }
 @keyframes dropIn { from { transform: translateY(-110vh) rotate(-30deg); } to { transform: none; } }
 
-.char-inner { position: relative; animation: var(--idle); transform-origin: 50% 100%; }
+.char-inner { position: relative; animation: var(--idle); transform-origin: 50% 100%; will-change: transform; }
 .char:nth-child(2n) .char-inner { animation-duration: 0.38s; }
 .char:nth-child(3n) .char-inner { animation-duration: 0.52s; }
 
@@ -511,7 +488,6 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   object-position: var(--pos, 50% 30%);
   transform: scale(var(--zoom, 1));
 }
-.toon .char-head img { filter: url(#toon) saturate(1.5) contrast(1.15); }
 .face-emoji { display: grid; place-items: center; width: 100%; height: 100%; font-size: calc(var(--size) * 0.72); line-height: 1; }
 
 .char-hat {
@@ -619,16 +595,16 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 .bubble {
   --shift: 0px;
   position: absolute;
-  bottom: calc(100% + 16px);
+  bottom: calc(100% + 4px);
   left: 50%;
   width: max-content;
-  max-width: min(64vw, 250px);
-  padding: 8px 13px;
+  max-width: min(86vw, 330px);
+  padding: 6px 12px;
   border-radius: 16px;
   background: #fff;
   color: var(--ink);
   font-weight: 700;
-  font-size: clamp(0.85rem, 3.6vw, 1rem);
+  font-size: clamp(0.8rem, 3.4vw, 1rem);
   line-height: 1.25;
   text-align: center;
   border: 3px solid var(--ink);
@@ -719,7 +695,6 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   left: var(--x);
   top: var(--y);
   translate: -50% -50%;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 1px #fff);
   cursor: pointer;
   opacity: 0;
   transform: translate(var(--fromX), var(--fromY)) scale(0.2) rotate(var(--rot));
@@ -731,8 +706,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  clip-path: url(#heartClip);
+  object-fit: contain;
   animation: heartbeat 1.8s ease-in-out infinite;
   animation-delay: var(--delay);
 }
@@ -760,11 +734,10 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   display: grid;
   place-items: center;
   background: rgba(15, 5, 30, 0.85);
-  backdrop-filter: blur(6px);
   padding: 16px;
   cursor: zoom-out;
 }
-.lightbox img { width: min(86vw, 520px); aspect-ratio: 1; object-fit: cover; clip-path: url(#heartClip); animation: popHeart 0.5s cubic-bezier(.3, 1.6, .5, 1); }
+.lightbox img { width: min(86vw, 520px); aspect-ratio: 1; object-fit: contain; animation: popHeart 0.5s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes popHeart { from { transform: scale(0.2) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
 
 /* ---------- Müzik ---------- */
@@ -776,9 +749,8 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   width: 42px; height: 42px;
   border-radius: 50%;
   font-size: 1.15rem;
-  background: var(--card);
+  background: rgba(27, 16, 53, 0.55);
   border: 1px solid var(--card-border);
-  backdrop-filter: blur(6px);
 }
 
 /* ---------- Ekran boyutları ---------- */

@@ -25,7 +25,7 @@ GitHub Pages'te yayınlanan, kaotik bir doğum günü sayfası.
 
 - Fotoğraf yoksa yerine emoji surat çıkar, site yine çalışır.
 - Yüz ortada olmazsa `pos` ayarını değiştir: `"50% 20%"` yukarı, `"50% 50%"` orta demek. `zoom` büyüdükçe yüze yaklaşır.
-- `toon: true` yüzlere çizgi film gibi sert renkler verir. İstemezsen `false` yap.
+- Yüzlerdeki çizgi film efekti ve kalp fotoğrafların kesimi telefonda kasmasın diye resimlerin içine önceden uygulandı (`characters/`, `photos/hearts/`).
 - Dosya adları büyük/küçük harfe duyarlıdır: `1.JPG` ile `1.jpg` aynı değildir.
 
 ### Şarkı

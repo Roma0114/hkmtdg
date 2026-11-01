@@ -8,9 +8,6 @@ window.BIRTHDAY = {
   // Pastadaki mum sayısı (1-12)
   candles: 6,
 
-  // Yüzleri çizgi film gibi göstermek için (renkleri sertleştirir)
-  toon: true,
-
   // Mikrofona üfleyemezse "tuşa basarak üfle" butonu kaç saniye sonra çıksın
   micFallbackDelay: 10,
 
@@ -44,17 +41,7 @@ window.BIRTHDAY = {
   ],
 
   // Pasta söndükten sonra kalp şeklinde çıkan fotoğraflar.
+  // photos/N.jpg dosyalarından hazırlanan kalp kesimli halleri (telefonda kasmasın diye önceden kesildi).
   // Az fotoğraf varsa kalbi doldurmak için tekrar edilir.
-  photos: [
-    "photos/4.jpg",
-    "photos/5.jpg",
-    "photos/6.jpg",
-    "photos/7.jpg",
-    "photos/8.jpg",
-    "photos/9.jpg",
-    "photos/10.jpg",
-    "photos/1.jpg",
-    "photos/2.jpg",
-    "photos/3.jpg",
-  ],
+  photos: [4, 5, 6, 7, 8, 9, 10, 1, 2, 3].map((n) => `photos/hearts/${n}.webp`),
 };
