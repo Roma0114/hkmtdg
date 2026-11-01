@@ -1,0 +1,7 @@
+.claude/
+# Orijinal büyük fotoğraflar (konum bilgisi içerebilir) repoya girmesin
+/*.jpg
+/*.jpeg
+/*.png
+/*.webp
+/*.mp3
