@@ -171,7 +171,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   animation: nameZoom 1.3s ease-in-out infinite;
 }
 .gate-sub {
-  display: block;
+  display: inline-block;
   margin-top: 14px;
   font-family: "Quicksand", sans-serif;
   font-weight: 700;
