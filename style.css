@@ -11,22 +11,78 @@
   --text: #fff7fb;
   --card: rgba(255, 255, 255, 0.1);
   --card-border: rgba(255, 255, 255, 0.22);
-  --cw: clamp(64px, min(19vw, 13vh), 118px);
-  --stage-h: clamp(200px, 33vh, 290px);
+  --cw: clamp(60px, min(18vw, 12vh), 112px);
+  --stage-h: clamp(170px, 30vh, 270px);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
 
-html { scroll-behavior: smooth; }
+/* Tek ekran: hiçbir yerde kaydırma yok */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 
 body {
   font-family: "Quicksand", system-ui, sans-serif;
   color: var(--text);
   background: radial-gradient(ellipse at top, var(--bg-3) 0%, var(--bg-2) 45%, var(--bg-1) 100%) fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Konserde her yer toz pembe */
+#pink {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at top, #ffc6e2 0%, #ff86bf 45%, #b8346f 100%);
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+.concert #pink { opacity: 1; }
+
+.spot {
+  position: fixed;
+  top: -6vh;
+  z-index: 0;
+  width: 70vmax;
+  height: 130vh;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 85%);
+  clip-path: polygon(47% 0, 53% 0, 100% 100%, 0 100%);
+  transform-origin: 50% 0;
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 1s;
+}
+.spot-l { left: -25vmax; animation: sweepL 2.6s ease-in-out infinite alternate; }
+.spot-r { right: -25vmax; animation: sweepR 2.6s ease-in-out infinite alternate; }
+.concert .spot { opacity: 1; }
+@keyframes sweepL { from { rotate: -40deg; } to { rotate: 10deg; } }
+@keyframes sweepR { from { rotate: 40deg; } to { rotate: -10deg; } }
+
+#countdown {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: "Bangers", cursive;
+  font-size: clamp(6rem, 40vw, 16rem);
+  color: #fff;
+  text-shadow: 6px 6px 0 var(--ink);
+}
+#countdown span { animation: countPop 0.8s cubic-bezier(.3, 1.6, .5, 1) forwards; }
+@keyframes countPop {
+  0% { transform: scale(3) rotate(-20deg); opacity: 0; }
+  30% { transform: scale(1) rotate(0); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0; }
 }
 
 button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; touch-action: manipulation; }
@@ -148,40 +204,40 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 }
 
 /* ---------- Genel ---------- */
-main { position: relative; z-index: 1; }
-section { position: relative; }
-
 .btn {
-  padding: 13px 26px;
-  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 22px 10px;
+  border-radius: 22px;
   font-family: "Bangers", cursive;
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   letter-spacing: 1.5px;
+  line-height: 1.1;
   color: var(--ink);
   background: var(--gold);
   border: 3px solid var(--ink);
   box-shadow: 4px 4px 0 var(--ink);
+  animation: btnIn 0.5s cubic-bezier(.3, 1.6, .5, 1);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
+.btn small { font-family: "Quicksand", sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0; }
 .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
-.btn-round { width: 56px; height: 56px; padding: 0; font-size: 1.5rem; display: grid; place-items: center; background: #fff; }
-.btn-round.listening { background: #ff4d6d; animation: micPulse 0.9s ease-in-out infinite; }
-@keyframes micPulse {
-  0%, 100% { box-shadow: 4px 4px 0 var(--ink), 0 0 0 0 rgba(255, 77, 109, 0.7); }
-  50% { box-shadow: 4px 4px 0 var(--ink), 0 0 0 14px rgba(255, 77, 109, 0); }
-}
+@keyframes btnIn { from { transform: scale(0) rotate(-10deg); } to { transform: none; } }
 
-/* ---------- Hero ---------- */
-#hero {
-  min-height: 100vh;
-  min-height: 100svh;
+/* ---------- Ana ekran ---------- */
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: calc(28px + env(safe-area-inset-top)) 16px calc(var(--stage-h) + 16px);
+  padding: calc(18px + env(safe-area-inset-top)) 12px calc(var(--stage-h) + 6px);
   overflow: hidden;
 }
-#hero.shake { animation: shake 0.5s linear; }
+#app.shake { animation: shake 0.5s linear; }
 @keyframes shake {
   0%, 100% { transform: translate(0, 0); }
   10% { transform: translate(-10px, 4px) rotate(-1deg); }
@@ -197,9 +253,10 @@ section { position: relative; }
 
 .title {
   position: relative;
+  flex: none;
   font-family: "Bangers", cursive;
   font-weight: 400;
-  font-size: clamp(2.7rem, 13vw, 5.6rem);
+  font-size: clamp(2.3rem, min(12vw, 7vh), 5.2rem);
   line-height: 0.95;
   letter-spacing: 2px;
   text-align: center;
@@ -236,8 +293,21 @@ section { position: relative; }
   94% { opacity: 0.85; transform: translate(3px, 1px); clip-path: inset(70% 0 5% 0); }
 }
 
+.title.beat { animation: beatPop 0.25s ease-out; }
+@keyframes beatPop { from { transform: scale(1.08); } to { transform: scale(1); } }
+
+/* ---------- Orta alan: önce pasta, sonra kalp fotoğraflar ---------- */
+.center-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
 /* ---------- Pasta ---------- */
-.cake-wrap { position: relative; margin: 18px 0 18px; animation: cakeIn 1s 0.3s cubic-bezier(.3, 1.5, .5, 1) both; }
+.cake-wrap { position: relative; transform-origin: 50% 50%; animation: cakeIn 1s 0.3s cubic-bezier(.3, 1.5, .5, 1) both; }
 @keyframes cakeIn { from { transform: scale(0) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
 
 .cake { position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
@@ -339,7 +409,26 @@ section { position: relative; }
 
 .cake-cat { position: absolute; left: 50%; bottom: 0; width: 120px; translate: -50% 0; animation: cakeIn 0.6s cubic-bezier(.3, 1.6, .5, 1) both; }
 
-.actions { display: flex; gap: 14px; align-items: center; position: relative; z-index: 4; }
+.hint-area {
+  flex: none;
+  min-height: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  z-index: 4;
+}
+.mic-hint {
+  font-family: "Bangers", cursive;
+  font-size: clamp(1.6rem, 7vw, 2.3rem);
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 3px 3px 0 var(--ink);
+  animation: micPulse 1s ease-in-out infinite;
+}
+@keyframes micPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12) rotate(-2deg); color: var(--gold); } }
 
 /* ---------- Karakterler ---------- */
 .stage { position: absolute; left: 0; right: 0; bottom: 0; height: var(--stage-h); z-index: 3; pointer-events: none; }
@@ -424,7 +513,35 @@ section { position: relative; }
 }
 @keyframes crown { from { rotate: -12deg; } to { rotate: 12deg; } }
 
-.char-body { display: block; width: 74%; margin: -10% auto 0; overflow: visible; }
+/* Kızların uzun saçı ve fiyonku */
+.char-hair {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--size) * -0.13);
+  top: calc(var(--size) * -0.07);
+  width: calc(var(--size) * 1.26);
+  height: calc(var(--size) * 1.35);
+  background: var(--hair, #2b1a12);
+  border: 3px solid var(--ink);
+  border-radius: 50% 50% 40% 40% / 44% 44% 56% 56%;
+  transform-origin: 50% 15%;
+  animation: hairSway 0.9s ease-in-out infinite alternate;
+}
+@keyframes hairSway { from { rotate: -7deg; } to { rotate: 7deg; } }
+.char-bow {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--size) * -0.14);
+  right: calc(var(--size) * -0.12);
+  font-size: calc(var(--size) * 0.42);
+  rotate: 18deg;
+  animation: crown 0.7s ease-in-out infinite alternate;
+}
+
+.char.beat .char-head { animation: beatHead 0.28s ease-out; }
+@keyframes beatHead { from { transform: scale(1.2); } to { transform: scale(1); } }
+
+.char-body { position: relative; z-index: 1; display: block; width: 74%; margin: -10% auto 0; overflow: visible; }
 .char-body .arm-l { animation: armL 0.45s ease-in-out infinite alternate; transform-box: view-box; transform-origin: 32px 16px; }
 .char-body .arm-r { animation: armR 0.45s ease-in-out infinite alternate; transform-box: view-box; transform-origin: 68px 16px; }
 .char-body .leg-l { animation: legL 0.45s ease-in-out infinite alternate; transform-box: view-box; transform-origin: 42px 52px; }
@@ -540,10 +657,14 @@ section { position: relative; }
 @keyframes dashR { from { transform: translateX(-150px); } to { transform: translateX(calc(100vw + 30px)); } }
 @keyframes dashL { from { transform: translateX(calc(100vw + 30px)); } to { transform: translateX(-150px); } }
 
-/* ---------- Kalp fotoğraflar ---------- */
-#memories { padding: 48px 16px 80px; }
-
-.photo-heart { position: relative; width: min(92vw, 600px); aspect-ratio: 1 / 0.95; margin: 0 auto; }
+/* ---------- Kalp fotoğraflar (pasta patlayınca) ---------- */
+.photo-heart {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.photo-heart.show { pointer-events: auto; }
+.photo-heart.beat { animation: beatPop 0.25s ease-out; }
 
 .ph {
   position: absolute;
@@ -617,16 +738,6 @@ section { position: relative; }
 /* ---------- Ekran boyutları ---------- */
 @media (min-width: 900px) {
   .cats { display: flex; }
-}
-
-@media (max-height: 720px) {
-  .tier-top { width: 100px; height: 38px; }
-  .tier-mid { width: 146px; height: 44px; }
-  .tier-bot { width: 194px; height: 50px; }
-  .plate { width: 226px; }
-  .candles { height: 58px; }
-  .candle { height: 32px !important; }
-  .cake-wrap { margin: 10px 0 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

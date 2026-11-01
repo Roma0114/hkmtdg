@@ -28,9 +28,13 @@
     </filter>
   </svg>
 
+  <div id="pink" aria-hidden="true"></div>
+  <div class="spot spot-l" aria-hidden="true"></div>
+  <div class="spot spot-r" aria-hidden="true"></div>
   <div id="floaters" aria-hidden="true"></div>
   <canvas id="fx" aria-hidden="true"></canvas>
   <div id="flash" aria-hidden="true"></div>
+  <div id="countdown" aria-hidden="true"></div>
 
   <!-- Açılış -->
   <section id="gate">
@@ -42,9 +46,9 @@
   </section>
 
   <main id="app" hidden>
-    <section id="hero">
-      <h1 id="title" class="title"></h1>
+    <h1 id="title" class="title"></h1>
 
+    <div id="centerStage" class="center-stage">
       <div class="cake-wrap">
         <div id="cake" class="cake">
           <div id="candles" class="candles"></div>
@@ -54,20 +58,20 @@
           <div class="plate"></div>
         </div>
       </div>
-
-      <div class="actions">
-        <button id="blowBtn" class="btn">🌬️ ÜFLE</button>
-        <button id="micBtn" class="btn btn-round" aria-label="Mikrofona üfle">🎤</button>
-      </div>
-
-      <div id="stage" class="stage"></div>
-      <div class="cats cats-left" aria-hidden="true"></div>
-      <div class="cats cats-right" aria-hidden="true"></div>
-    </section>
-
-    <section id="memories">
       <div id="photoHeart" class="photo-heart"></div>
-    </section>
+    </div>
+
+    <div class="hint-area">
+      <p id="micHint" class="mic-hint" hidden>🎤 MİKROFONA ÜFLE!</p>
+      <button id="blowBtn" class="btn" hidden>
+        <small>sanırım nefesin yetmedi 😮‍💨</small>
+        TUŞA BASARAK ÜFLE
+      </button>
+    </div>
+
+    <div id="stage" class="stage"></div>
+    <div class="cats cats-left" aria-hidden="true"></div>
+    <div class="cats cats-right" aria-hidden="true"></div>
   </main>
 
   <div id="lightbox" class="lightbox" hidden>

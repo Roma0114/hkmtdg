@@ -3,10 +3,15 @@
   const $ = (sel) => document.querySelector(sel);
   const rand = (min, max) => Math.random() * (max - min) + min;
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const fmt = (text) => text.replaceAll("{name}", cfg.name || "");
 
   const COLORS = ["#ff6fa8", "#ffd166", "#7be0c3", "#7cc6ff", "#c39bff", "#ff9a6b"];
+  const PINKS = ["#ff6fa8", "#ffc2da", "#ff9ccf", "#ffffff", "#ffd166"];
+
+  // "intro" → "cake" (mumlar) → "concert" (pasta patladıktan sonra)
+  let phase = "intro";
 
   // ---------------------------------------------------------------
   //  Efektler: konfeti, sarsıntı, flaş
@@ -17,15 +22,15 @@
 
   let emojiShapes = [];
   if (window.confetti && typeof window.confetti.shapeFromText === "function") {
-    emojiShapes = ["🐱", "🎂", "💖", "🤡", "🎈", "💀"].map((text) => window.confetti.shapeFromText({ text, scalar: 2 }));
+    emojiShapes = ["🐱", "🎂", "💖", "🤡", "🎈", "🩷"].map((text) => window.confetti.shapeFromText({ text, scalar: 2 }));
   }
 
   // Sağdan ve soldan konfeti topları
-  function sideCannons(duration = 2500) {
+  function sideCannons(duration = 2500, colors = COLORS) {
     const end = Date.now() + duration;
     (function frame() {
-      fire({ particleCount: 4, angle: 60, spread: 60, startVelocity: 60, origin: { x: 0, y: 0.75 }, colors: COLORS });
-      fire({ particleCount: 4, angle: 120, spread: 60, startVelocity: 60, origin: { x: 1, y: 0.75 }, colors: COLORS });
+      fire({ particleCount: 4, angle: 60, spread: 60, startVelocity: 60, origin: { x: 0, y: 0.75 }, colors });
+      fire({ particleCount: 4, angle: 120, spread: 60, startVelocity: 60, origin: { x: 1, y: 0.75 }, colors });
       if (Date.now() < end) requestAnimationFrame(frame);
     })();
   }
@@ -52,12 +57,13 @@
   }
 
   function restartClass(el, cls) {
+    if (!el) return;
     el.classList.remove(cls);
     void el.offsetWidth; // animasyonu baştan başlatmak için
     el.classList.add(cls);
   }
 
-  const shake = () => restartClass($("#hero"), "shake");
+  const shake = () => restartClass($("#app"), "shake");
   const flash = () => restartClass($("#flash"), "on");
 
   // ---------------------------------------------------------------
@@ -79,7 +85,8 @@
   let heroEl = null;
   const crewEls = [];
 
-  function bodySVG(shirt) {
+  // Hikmet: tişört + pantolon
+  function boySVG(shirt) {
     return `
 <svg class="char-body" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <g class="leg-l"><line x1="42" y1="52" x2="38" y2="88" stroke="#2b2b45" stroke-width="11" stroke-linecap="round"/><ellipse cx="34" cy="92" rx="10" ry="6" fill="#1b1035"/></g>
@@ -91,20 +98,38 @@
 </svg>`;
   }
 
+  // Kızlar: kabarık kollu, kloş etekli elbise
+  function girlSVG(dress) {
+    return `
+<svg class="char-body" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <g class="leg-l"><line x1="44" y1="60" x2="41" y2="89" stroke="#ffd9b8" stroke-width="7" stroke-linecap="round"/><ellipse cx="38" cy="92" rx="8" ry="5" fill="#ff3f86" stroke="#1b1035" stroke-width="2"/></g>
+  <g class="leg-r"><line x1="56" y1="60" x2="59" y2="89" stroke="#ffd9b8" stroke-width="7" stroke-linecap="round"/><ellipse cx="62" cy="92" rx="8" ry="5" fill="#ff3f86" stroke="#1b1035" stroke-width="2"/></g>
+  <g class="arm-l"><line x1="32" y1="16" x2="12" y2="40" stroke="#ffd9b8" stroke-width="7" stroke-linecap="round"/><circle cx="11" cy="42" r="5.5" fill="#ffd9b8"/></g>
+  <g class="arm-r"><line x1="68" y1="16" x2="88" y2="40" stroke="#ffd9b8" stroke-width="7" stroke-linecap="round"/><circle cx="89" cy="42" r="5.5" fill="#ffd9b8"/></g>
+  <path d="M37 32 L63 32 L85 74 Q50 86 15 74 Z" fill="${dress}" stroke="#1b1035" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="34" cy="62" r="2.6" fill="#fff" opacity="0.7"/><circle cx="50" cy="70" r="2.6" fill="#fff" opacity="0.7"/>
+  <circle cx="64" cy="58" r="2.6" fill="#fff" opacity="0.7"/><circle cx="45" cy="50" r="2.6" fill="#fff" opacity="0.7"/>
+  <path d="M35 8 Q50 3 65 8 L63 34 L37 34 Z" fill="${dress}" stroke="#1b1035" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="33" cy="13" r="7.5" fill="${dress}" stroke="#1b1035" stroke-width="3"/>
+  <circle cx="67" cy="13" r="7.5" fill="${dress}" stroke="#1b1035" stroke-width="3"/>
+  <line x1="38" y1="33" x2="62" y2="33" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>
+</svg>`;
+  }
+
   function makeChar(spec, { hero = false, face = "🤪", x = 50, enter = "enter-l", delay = 0, back = false } = {}) {
     const el = document.createElement("div");
-    el.className = `char ${enter}` + (hero ? " hero" : "");
+    el.className = `char ${enter}` + (hero ? " hero" : "") + (back ? " back" : "");
     el.style.left = `${x}%`;
+    el.dataset.home = x;
     el.style.animationDelay = `${delay}s`;
-    el.style.setProperty("--shirt", spec.shirt || pick(COLORS));
-    el.style.setProperty("--hat", pick(COLORS));
-    if (back) el.classList.add("back");
+    el.style.setProperty("--shirt", (hero ? spec.shirt : spec.dress) || pick(COLORS));
+    el.style.setProperty("--hair", spec.hair || "#2b1a12");
     el.innerHTML = `
       <div class="bubble"></div>
       <div class="char-inner">
-        ${hero ? '<span class="char-crown">👑</span>' : '<span class="char-hat"></span>'}
+        ${hero ? '<span class="char-crown">👑</span>' : '<span class="char-hair"></span><span class="char-bow">🎀</span>'}
         <div class="char-head"></div>
-        ${bodySVG(spec.shirt || "#ff6fa8")}
+        ${hero ? boySVG(spec.shirt || "#ffd166") : girlSVG(spec.dress || "#ff6fa8")}
       </div>`;
 
     const head = el.querySelector(".char-head");
@@ -123,7 +148,7 @@
 
     el.addEventListener("click", () => {
       doMove(el);
-      say(el, fmt(pick(el === heroEl ? cfg.heroLines || ["..."] : cfg.crewLines || ["🎉"])));
+      say(el, fmt(pick(linesFor(el === heroEl))));
     });
     return el;
   }
@@ -133,7 +158,7 @@
     stage.innerHTML = "";
     if (cfg.toon) document.body.classList.add("toon");
 
-    // Önde 4, arkada 2 kişi; taçlı kahraman ortada
+    // Önde 4, arkada 2 kız; taçlı Hikmet ortada
     const slots = [
       { x: 12 }, { x: 88 }, { x: 31 }, { x: 69 }, { x: 40, back: true }, { x: 60, back: true },
     ];
@@ -152,6 +177,11 @@
 
     heroEl = makeChar(cfg.hero || {}, { hero: true, face: "😐", x: 50, enter: "enter-d", delay: 0.2 });
     stage.appendChild(heroEl);
+  }
+
+  function linesFor(isHero) {
+    if (phase === "concert") return (isHero ? cfg.concertHeroLines : cfg.concertLines) || ["🩷"];
+    return (isHero ? cfg.heroLines : cfg.crewLines) || ["🎉"];
   }
 
   // Konuşma balonu
@@ -186,6 +216,7 @@
   }
 
   function doMove(ch, move = pick(MOVES)) {
+    if (!ch) return;
     MOVES.forEach((m) => ch.classList.remove(m));
     void ch.offsetWidth;
     ch.classList.add(move);
@@ -196,41 +227,50 @@
   let chorusUntil = 0;
   function chorus(lines, count = 3) {
     chorusUntil = Date.now() + 3200;
-    const people = [...crewEls].sort(() => Math.random() - 0.5).slice(0, count);
-    const shuffled = [...lines].sort(() => Math.random() - 0.5);
+    const people = shuffle(crewEls).slice(0, count);
+    const mixed = shuffle(lines);
     people.forEach((ch, i) => {
       setTimeout(() => {
-        say(ch, fmt(shuffled[i % shuffled.length]), 2800);
+        say(ch, fmt(mixed[i % mixed.length]), 2800);
         doMove(ch);
       }, i * 280);
     });
   }
 
+  async function playScript(script, gap = 2300, stopAtConcert = false) {
+    for (const [who, text] of script || []) {
+      if (stopAtConcert && phase === "concert") return;
+      const ch = who === "hero" ? heroEl : crewEls[who % crewEls.length];
+      say(ch, fmt(text), gap);
+      if (Math.random() < 0.6) doMove(ch);
+      await sleep(gap);
+    }
+  }
+
   async function runShow() {
     await sleep(2600);
-    for (const [who, text] of cfg.intro || []) {
-      const ch = who === "hero" ? heroEl : crewEls[who % crewEls.length];
-      say(ch, fmt(text), 2300);
-      if (Math.random() < 0.6) doMove(ch);
-      await sleep(2300);
-    }
-    // Sonrasında rastgele laflar
+    await playScript(cfg.intro, 2300, true);
+    // Sonrasında rastgele laflar (konserde konser lafları)
     for (;;) {
       await sleep(rand(2000, 3400));
       if (Date.now() < chorusUntil || document.hidden) continue;
-      if (Math.random() < 0.25) say(heroEl, fmt(pick(cfg.heroLines || ["..."])));
-      else say(pick(crewEls), fmt(pick(cfg.crewLines || ["🎉"])));
+      const heroTurn = Math.random() < 0.25;
+      say(heroTurn ? heroEl : pick(crewEls), fmt(pick(linesFor(heroTurn))));
     }
   }
 
   function startChaos() {
-    // Rastgele çılgın hareketler
+    // Rastgele çılgın hareketler (konserde kızlar koreografi yapar, sadece Hikmet saçmalar)
     setInterval(() => {
-      const all = [...crewEls, heroEl];
-      doMove(Math.random() < 0.2 ? heroEl : pick(all));
+      if (phase === "concert") {
+        if (Math.random() < 0.6) doMove(heroEl);
+        return;
+      }
+      doMove(Math.random() < 0.2 ? heroEl : pick(crewEls));
     }, 1100);
-    // Ekip sahnede dolaşsın
+    // Kızlar sahnede dolaşsın
     setInterval(() => {
+      if (phase === "concert") return;
       const ch = pick(crewEls);
       if (ch && !ch.classList.contains("talking")) ch.style.left = `${rand(11, 89)}%`;
     }, 2400);
@@ -263,6 +303,15 @@
     }
   }
 
+  // Pastayı orta alana sığacak kadar küçült
+  function fitCake() {
+    const box = $("#centerStage");
+    const cake = $("#cake");
+    if (!box || !cake.offsetHeight) return;
+    const s = Math.min(1.25, (box.clientHeight - 10) / cake.offsetHeight, (box.clientWidth - 10) / cake.offsetWidth);
+    $(".cake-wrap").style.scale = Math.max(0.4, s);
+  }
+
   async function extinguish() {
     for (const c of document.querySelectorAll(".candle")) {
       c.classList.remove("relit");
@@ -280,10 +329,11 @@
   }
 
   async function blowCandles() {
-    if (!candlesLit || busy) return;
+    if (phase === "concert" || !candlesLit || busy) return;
     busy = true;
     candlesLit = false;
     blows++;
+    clearTimeout(fallbackTimer);
     await extinguish();
 
     if (blows % 2 === 1) {
@@ -298,13 +348,18 @@
       shake();
       chorus(cfg.trickLines || ["🤡"]);
       setTimeout(() => say(heroEl, "NASIL YANI 😨", 2200), 900);
+      $("#micHint").textContent = "🎤 BİR DAHA ÜFLE!";
+      armFallback();
       candlesLit = true;
       busy = false;
       return;
     }
 
-    // Pasta patlıyor
-    setButtons(false);
+    // Pasta patlıyor → konser
+    phase = "concert";
+    stopMic();
+    $("#micHint").hidden = true;
+    $("#blowBtn").hidden = true;
     await sleep(250);
     $("#cake").classList.add("boom");
     await sleep(550);
@@ -315,7 +370,7 @@
     setTimeout(() => emojiRain(45), 400);
     chorus(cfg.boomLines || ["💥"], 4);
     doMove(heroEl, "m-flip");
-    $("#hero").classList.add("party");
+    $("#app").classList.add("party");
 
     await sleep(900);
     const cat = document.createElement("div");
@@ -323,30 +378,31 @@
     cat.innerHTML = catSVG(pick(CAT_THEMES));
     $(".cake-wrap").appendChild(cat);
 
-    await sleep(6000);
-    $("#hero").classList.remove("party");
-    cat.remove();
-    const cake = $("#cake");
-    cake.classList.remove("boom");
-    restartClass(cake, "regrow");
-    buildCandles();
-    candlesLit = true;
-    busy = false;
-    setButtons(true);
-    say(heroEl, "yeni pasta geldi 🙂 bir daha?", 2600);
+    await sleep(2400);
+    $(".cake-wrap").hidden = true;
+    $("#app").classList.remove("party");
+    startConcert();
   }
 
-  function setButtons(on) {
-    $("#blowBtn").disabled = !on;
-    $(".actions").style.visibility = on ? "visible" : "hidden";
-  }
-
-  // Mikrofona üfleyerek söndürme
+  // ---------------------------------------------------------------
+  //  Mikrofona üfleme (yedek: belli süre sonra "tuşa basarak üfle")
+  // ---------------------------------------------------------------
   let micStream = null;
-  let micRaf = 0;
+  let micTimer = 0;
+  let fallbackTimer = 0;
+
+  function showFallback() {
+    if (phase !== "cake" || !candlesLit || !$("#blowBtn").hidden) return;
+    $("#blowBtn").hidden = false;
+    say(pick(crewEls), "nefesi yetmedi galiba 😂", 2400);
+  }
+
+  function armFallback(ms = (cfg.micFallbackDelay || 10) * 1000) {
+    clearTimeout(fallbackTimer);
+    fallbackTimer = setTimeout(showFallback, ms);
+  }
 
   async function startMic() {
-    const btn = $("#micBtn");
     const ctx = getAudioCtx();
     ctx.resume();
     try {
@@ -354,12 +410,9 @@
         audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false },
       });
     } catch {
-      btn.textContent = "🚫";
-      say(heroEl, "mikrofon izni vermedin 😤 butona bas o zaman");
-      return;
+      micStream = null;
+      return false;
     }
-    btn.classList.add("listening");
-    say(heroEl, "dinliyorum... ÜFLE! 🌬️", 2000);
 
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 512;
@@ -367,25 +420,250 @@
     const data = new Uint8Array(analyser.fftSize);
     let loudFrames = 0;
 
-    (function listen() {
+    micTimer = setInterval(() => {
       analyser.getByteTimeDomainData(data);
       let sum = 0;
       for (const v of data) sum += ((v - 128) / 128) ** 2;
       const rms = Math.sqrt(sum / data.length);
       loudFrames = rms > 0.16 ? loudFrames + 1 : Math.max(0, loudFrames - 1);
+      // ~0.25 sn boyunca güçlü ses = üfleme
       if (loudFrames > 8) {
         loudFrames = 0;
-        blowCandles();
+        if (phase === "cake") blowCandles();
       }
-      micRaf = requestAnimationFrame(listen);
-    })();
+    }, 30);
+    return true;
   }
 
   function stopMic() {
-    cancelAnimationFrame(micRaf);
+    clearInterval(micTimer);
     if (micStream) micStream.getTracks().forEach((t) => t.stop());
     micStream = null;
-    $("#micBtn").classList.remove("listening");
+  }
+
+  // ---------------------------------------------------------------
+  //  Konser: şarkı + ritimli dans + toz pembe ekran
+  // ---------------------------------------------------------------
+  const CHOREO = ["m-jump", "m-squash", "m-spin", "m-shake", "m-flip", "m-grow"];
+  let beatCount = 0;
+
+  function onBeat() {
+    beatCount++;
+    [...crewEls, heroEl].forEach((ch) => restartClass(ch, "beat"));
+    restartClass($("#title"), "beat");
+    restartClass($("#photoHeart"), "beat");
+
+    // Her 4 vuruşta kızlar aynı hareketi yapar
+    if (beatCount % 4 === 0) {
+      const move = CHOREO[(beatCount / 4) % CHOREO.length];
+      crewEls.forEach((ch) => doMove(ch, move));
+    }
+    if (beatCount % 16 === 0) {
+      sideCannons(350, PINKS);
+      emojiRain(12);
+    }
+  }
+
+  async function startConcert() {
+    // Kızlar sıraya dizilir, pastanın yerinde kalp fotoğraflar
+    crewEls.forEach((ch) => (ch.style.left = `${ch.dataset.home}%`));
+    buildPhotoHeart();
+    setTimeout(() => $("#photoHeart").classList.add("show"), 60);
+    setTimeout(() => emojiRain(20), 1500);
+
+    chorusUntil = Date.now() + 8000;
+    await playScript(cfg.concertIntro, 1700);
+
+    // 3, 2, 1, 🎤
+    const cd = $("#countdown");
+    for (const n of ["3", "2", "1", "🎤"]) {
+      cd.innerHTML = `<span>${n}</span>`;
+      await sleep(750);
+    }
+    cd.innerHTML = "";
+
+    document.body.classList.add("concert");
+    flash();
+    sideCannons(1500, PINKS);
+    stopBit();
+    playSong();
+  }
+
+  // ---------------------------------------------------------------
+  //  Müzik
+  // ---------------------------------------------------------------
+  let audioCtx = null;
+  let musicOn = false;
+  let musicMode = "bit"; // "bit" = 8-bit melodi, "song" = konser şarkısı
+  let bitTimer = 0;
+  let bitGain = null;
+  let bitBeat = 0.34;
+  let beatClock = 0;
+  let songAudio = null;
+  let songFailed = false;
+  let songAnalyser = null;
+
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  // Happy Birthday (kamu malı) — [midi nota, vuruş]
+  const SONG = [
+    [67, 0.75], [67, 0.25], [69, 1], [67, 1], [72, 1], [71, 2],
+    [67, 0.75], [67, 0.25], [69, 1], [67, 1], [74, 1], [72, 2],
+    [67, 0.75], [67, 0.25], [79, 1], [76, 1], [72, 1], [71, 1], [69, 2],
+    [77, 0.75], [77, 0.25], [76, 1], [72, 1], [74, 1], [72, 3],
+  ];
+
+  function playNote(ctx, out, midi, when, dur) {
+    const freq = 440 * 2 ** ((midi - 69) / 12);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, when);
+    gain.gain.exponentialRampToValueAtTime(0.07, when + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, when + dur * 0.95);
+    gain.connect(out);
+    const lead = ctx.createOscillator();
+    lead.type = "square";
+    lead.frequency.value = freq;
+    lead.connect(gain);
+    lead.start(when);
+    lead.stop(when + dur);
+
+    // Altta zıplayan bas
+    const bass = ctx.createOscillator();
+    const bg = ctx.createGain();
+    bass.type = "triangle";
+    bass.frequency.value = freq / 4;
+    bg.gain.setValueAtTime(0.18, when);
+    bg.gain.exponentialRampToValueAtTime(0.0001, when + Math.min(dur, 0.25));
+    bass.connect(bg).connect(out);
+    bass.start(when);
+    bass.stop(when + 0.3);
+  }
+
+  function bitLoop() {
+    const ctx = getAudioCtx();
+    const out = bitGain;
+    let t = ctx.currentTime + 0.1;
+    for (const [midi, beats] of SONG) {
+      playNote(ctx, out, midi, t, beats * bitBeat);
+      t += beats * bitBeat;
+    }
+    const total = SONG.reduce((s, [, b]) => s + b, 0) * bitBeat;
+    bitTimer = setTimeout(() => musicOn && out === bitGain && bitLoop(), (total + 0.6) * 1000);
+  }
+
+  function startBit() {
+    const ctx = getAudioCtx();
+    ctx.resume();
+    stopBit();
+    bitGain = ctx.createGain();
+    bitGain.connect(ctx.destination);
+    musicOn = true;
+    bitLoop();
+    // Şarkı yoksa konserde 8-bit melodiye göre ritim tut
+    if (phase === "concert") beatClock = setInterval(onBeat, bitBeat * 2000);
+  }
+
+  function stopBit() {
+    clearTimeout(bitTimer);
+    clearInterval(beatClock);
+    // Planlanmış notaları hemen susturmak için çıkışı kopar
+    if (bitGain) bitGain.disconnect();
+    bitGain = null;
+  }
+
+  // iOS'ta şarkının sonradan çalabilmesi için dokunuş anında "kilidi aç"
+  function prepareSong() {
+    if (!cfg.song) {
+      songFailed = true;
+      return;
+    }
+    songAudio = new Audio(cfg.song);
+    songAudio.preload = "auto";
+    songAudio.loop = true;
+    songAudio.addEventListener("error", () => (songFailed = true));
+    songAudio.muted = true;
+    songAudio
+      .play()
+      .then(() => {
+        songAudio.pause();
+        songAudio.muted = false;
+      })
+      .catch(() => (songAudio.muted = false));
+  }
+
+  function playSong() {
+    if (songFailed || !songAudio) return concertFallback();
+    musicMode = "song";
+    musicOn = true;
+    try {
+      songAudio.currentTime = cfg.songStart || 0;
+    } catch {}
+    songAudio.muted = false;
+    songAudio
+      .play()
+      .then(() => {
+        listenToBeats();
+        say(pick(crewEls), "TOZ PEMBEEEE 🩷", 2400);
+      })
+      .catch(concertFallback);
+  }
+
+  function concertFallback() {
+    musicMode = "bit";
+    bitBeat = 0.26; // konser temposu
+    startBit();
+  }
+
+  // Şarkının baslarındaki vuruşları yakala
+  function listenToBeats() {
+    const ctx = getAudioCtx();
+    if (!songAnalyser) {
+      songAnalyser = ctx.createAnalyser();
+      songAnalyser.fftSize = 1024;
+      songAnalyser.smoothingTimeConstant = 0.5;
+      ctx.createMediaElementSource(songAudio).connect(songAnalyser);
+      songAnalyser.connect(ctx.destination);
+    }
+    const bins = new Uint8Array(songAnalyser.frequencyBinCount);
+    const history = [];
+    let last = performance.now();
+
+    setInterval(() => {
+      if (songAudio.paused) return;
+      songAnalyser.getByteFrequencyData(bins);
+      let energy = 0;
+      for (let i = 1; i <= 5; i++) energy += bins[i]; // ~40-230 Hz
+      energy /= 5;
+      history.push(energy);
+      if (history.length > 50) history.shift();
+      const avg = history.reduce((a, b) => a + b, 0) / history.length;
+      const now = performance.now();
+      const isBeat = energy > avg * 1.12 && energy > 90 && now - last > 280;
+      // Vuruş yakalanamazsa da dans dursun istemeyiz
+      if (isBeat || now - last > 650) {
+        last = now;
+        onBeat();
+      }
+    }, 25);
+  }
+
+  function toggleMusic() {
+    if (musicMode === "song" && songAudio) {
+      if (songAudio.paused) songAudio.play().catch(() => {});
+      else songAudio.pause();
+      $("#musicBtn").textContent = songAudio.paused ? "🔇" : "🔊";
+      return;
+    }
+    if (musicOn) {
+      musicOn = false;
+      stopBit();
+    } else {
+      startBit();
+    }
+    $("#musicBtn").textContent = musicOn ? "🔊" : "🔇";
   }
 
   // ---------------------------------------------------------------
@@ -440,7 +718,7 @@
   }
 
   function spawnSideCats() {
-    const themes = [...CAT_THEMES].sort(() => Math.random() - 0.5);
+    const themes = shuffle(CAT_THEMES);
     [".cats-left", ".cats-right"].forEach((sel, side) => {
       const box = $(sel);
       box.innerHTML = "";
@@ -455,20 +733,21 @@
   }
 
   const SCREAMS = ["AAAAAAA", "MİYAAAAV", "İYİ Kİ DOĞDUUUN", "🎂🎂🎂", "PASTA NEREDE"];
+  const CONCERT_SCREAMS = ["TOZ PEMBEEE", "MİYAV 🩷", "BİS!!!", "AAAAAAA", "🎤🎤🎤"];
 
   function catDash() {
     const el = document.createElement("div");
     el.className = "cat-dash" + (Math.random() < 0.5 ? " rev" : "");
-    el.style.top = `${rand(20, 65)}vh`;
-    el.innerHTML = `<span class="scream">${pick(SCREAMS)}</span>${catSVG(pick(CAT_THEMES))}`;
+    el.style.top = `${rand(20, 55)}vh`;
+    el.innerHTML = `<span class="scream">${pick(phase === "concert" ? CONCERT_SCREAMS : SCREAMS)}</span>${catSVG(pick(CAT_THEMES))}`;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1800);
   }
 
   // ---------------------------------------------------------------
-  //  Fotoğraflar (kalp şeklinde)
+  //  Fotoğraflar (pasta patlayınca kalp şeklinde)
   // ---------------------------------------------------------------
-  const PLACEHOLDER_EMOJI = ["📸", "💖", "🤡", "🎈", "✨", "🐱", "🎂", "💀", "🦋", "🍰"];
+  const PLACEHOLDER_EMOJI = ["📸", "💖", "🤡", "🎈", "✨", "🐱", "🎂", "🩷", "🦋", "🍰"];
 
   function placeholder(i) {
     const a = COLORS[i % COLORS.length];
@@ -519,8 +798,8 @@
       const { x, y } = pts[i];
       const el = document.createElement("div");
       el.className = "ph";
-      el.style.setProperty("--x", `${50 + (x / 16) * 40}%`);
-      el.style.setProperty("--y", `${50 - ((y + 2.5) / 14.5) * 42}%`);
+      el.dataset.x = x;
+      el.dataset.y = y;
       el.style.setProperty("--fromX", `${x < 0 ? -70 : 70}vw`);
       el.style.setProperty("--fromY", `${rand(-40, 40)}vh`);
       el.style.setProperty("--rot", `${rand(-180, 180)}deg`);
@@ -528,7 +807,6 @@
 
       const img = document.createElement("img");
       img.alt = `Anı ${i + 1}`;
-      img.loading = "lazy";
       img.onload = () => (photoSrcs[i] = img.src);
       img.onerror = () => {
         img.onerror = null;
@@ -544,14 +822,25 @@
     sizePhotos();
   }
 
+  // Kalbi orta alana sığdır ve ortala, fotoğrafları sayısına göre boyutlandır
   function sizePhotos() {
     const box = $("#photoHeart");
-    const items = box.querySelectorAll(".ph");
+    const items = [...box.querySelectorAll(".ph")];
     if (!items.length) return;
-    const w = box.clientWidth;
-    const perimeter = w * 2.75; // kalp çevresinin kutu genişliğine yaklaşık oranı
-    const size = Math.min(w * 0.22, (perimeter / items.length) * 1.05);
-    items.forEach((el) => el.style.setProperty("--size", `${size}px`));
+    const W = Math.min(box.clientWidth * 0.96, 560);
+    const H = box.clientHeight;
+    const ys = items.map((el) => +el.dataset.y);
+    const yMin = Math.min(...ys);
+    const yMax = Math.max(...ys);
+    const yMid = (yMin + yMax) / 2;
+
+    const size = Math.min(W * 0.22, H * 0.3, ((W * 2.75) / items.length) * 1.05);
+    const scale = Math.min((W - size) / 32, (H - size) / (yMax - yMin));
+    items.forEach((el) => {
+      el.style.setProperty("--size", `${size}px`);
+      el.style.setProperty("--x", `${box.clientWidth / 2 + +el.dataset.x * scale}px`);
+      el.style.setProperty("--y", `${H / 2 - (+el.dataset.y - yMid) * scale}px`);
+    });
   }
 
   function openLightbox(src) {
@@ -565,15 +854,16 @@
   // ---------------------------------------------------------------
   const floaters = $("#floaters");
   const FLOAT_EMOJI = ["💖", "🤡", "💀", "🙀", "🎉", "⭐", "😵‍💫", "🎈"];
+  const CONCERT_EMOJI = ["🩷", "💖", "🎤", "🎀", "💅", "✨", "🌸"];
 
   function spawnFloater() {
-    if (document.hidden || floaters.childElementCount > 24) return;
+    if (document.hidden || floaters.childElementCount > 22) return;
     const roll = Math.random();
     let el;
-    if (roll < 0.35) {
+    if (roll < 0.3) {
       el = document.createElement("div");
       el.className = "floater balloon";
-      el.style.background = pick(COLORS);
+      el.style.background = pick(phase === "concert" ? PINKS : COLORS);
       el.addEventListener("pointerdown", (e) => {
         fire({
           particleCount: 25,
@@ -584,7 +874,7 @@
         });
         el.remove();
       });
-    } else if (roll < 0.47 && photoSrcs.some(Boolean)) {
+    } else if (roll < 0.42 && photoSrcs.some(Boolean)) {
       el = document.createElement("img");
       el.className = "floater photo-float";
       el.src = pick(photoSrcs.filter(Boolean));
@@ -592,7 +882,7 @@
     } else {
       el = document.createElement("div");
       el.className = "floater";
-      el.textContent = pick(FLOAT_EMOJI);
+      el.textContent = pick(phase === "concert" ? CONCERT_EMOJI : FLOAT_EMOJI);
       el.style.fontSize = `${rand(18, 34)}px`;
     }
     el.style.left = `${rand(0, 92)}vw`;
@@ -600,92 +890,6 @@
     el.style.animationDuration = `${dur}s`;
     floaters.appendChild(el);
     setTimeout(() => el.remove(), dur * 1000);
-  }
-
-  // ---------------------------------------------------------------
-  //  Müzik (8-bit Happy Birthday ya da kendi dosyan)
-  // ---------------------------------------------------------------
-  let audioCtx = null;
-  let musicOn = false;
-  let musicTimer = 0;
-  let musicGain = null;
-  let fileAudio = null;
-
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
-  }
-
-  // Happy Birthday (kamu malı) — [midi nota, vuruş]
-  const SONG = [
-    [67, 0.75], [67, 0.25], [69, 1], [67, 1], [72, 1], [71, 2],
-    [67, 0.75], [67, 0.25], [69, 1], [67, 1], [74, 1], [72, 2],
-    [67, 0.75], [67, 0.25], [79, 1], [76, 1], [72, 1], [71, 1], [69, 2],
-    [77, 0.75], [77, 0.25], [76, 1], [72, 1], [74, 1], [72, 3],
-  ];
-  const BEAT = 0.34;
-
-  function playNote(ctx, out, midi, when, dur) {
-    const freq = 440 * 2 ** ((midi - 69) / 12);
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, when);
-    gain.gain.exponentialRampToValueAtTime(0.07, when + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, when + dur * 0.95);
-    gain.connect(out);
-    const lead = ctx.createOscillator();
-    lead.type = "square";
-    lead.frequency.value = freq;
-    lead.connect(gain);
-    lead.start(when);
-    lead.stop(when + dur);
-
-    // Altta zıplayan bas
-    const bass = ctx.createOscillator();
-    const bg = ctx.createGain();
-    bass.type = "triangle";
-    bass.frequency.value = freq / 4;
-    bg.gain.setValueAtTime(0.18, when);
-    bg.gain.exponentialRampToValueAtTime(0.0001, when + Math.min(dur, 0.25));
-    bass.connect(bg).connect(out);
-    bass.start(when);
-    bass.stop(when + 0.3);
-  }
-
-  function playSongLoop() {
-    const ctx = getAudioCtx();
-    const out = musicGain;
-    let t = ctx.currentTime + 0.1;
-    for (const [midi, beats] of SONG) {
-      playNote(ctx, out, midi, t, beats * BEAT);
-      t += beats * BEAT;
-    }
-    const total = SONG.reduce((s, [, b]) => s + b, 0) * BEAT;
-    musicTimer = setTimeout(() => musicOn && out === musicGain && playSongLoop(), (total + 1) * 1000);
-  }
-
-  function startMusic() {
-    musicOn = true;
-    $("#musicBtn").textContent = "🔊";
-    if (cfg.musicFile) {
-      fileAudio = fileAudio || Object.assign(new Audio(cfg.musicFile), { loop: true, volume: 0.7 });
-      fileAudio.play().catch(() => {});
-      return;
-    }
-    const ctx = getAudioCtx();
-    ctx.resume();
-    musicGain = ctx.createGain();
-    musicGain.connect(ctx.destination);
-    playSongLoop();
-  }
-
-  function stopMusic() {
-    musicOn = false;
-    $("#musicBtn").textContent = "🔇";
-    clearTimeout(musicTimer);
-    if (fileAudio) fileAudio.pause();
-    // Planlanmış notaları hemen susturmak için çıkışı kopar
-    if (musicGain) musicGain.disconnect();
-    musicGain = null;
   }
 
   // ---------------------------------------------------------------
@@ -698,8 +902,10 @@
     flash();
     fire({ particleCount: 160, spread: 130, startVelocity: 50, origin: { x: 0.5, y: 0.55 }, colors: COLORS });
 
-    // Ses, kullanıcı dokunduğu anda başlamalı (tarayıcı kuralı)
-    startMusic();
+    // Ses ve mikrofon, kullanıcı dokunduğu anda başlamalı (tarayıcı kuralı)
+    startBit();
+    prepareSong();
+    const micReady = startMic();
 
     setTimeout(() => {
       $("#gate").classList.add("gone");
@@ -709,35 +915,27 @@
       buildCandles();
       spawnStage();
       spawnSideCats();
-      buildPhotoHeart();
-      observePhotos();
+      requestAnimationFrame(fitCake);
+      setTimeout(fitCake, 1400); // yazı tipi yüklendikten sonra tekrar
       sideCannons(2500);
       setTimeout(() => emojiRain(25), 1200);
-      setInterval(spawnFloater, 750);
+      setInterval(spawnFloater, 800);
       setTimeout(startChaos, 3000);
       runShow();
-    }, 600);
-  }
 
-  function observePhotos() {
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0].isIntersecting) return;
-        io.disconnect();
-        $("#photoHeart").classList.add("show");
-        setTimeout(() => emojiRain(20), 1500);
-      },
-      { threshold: 0.3 }
-    );
-    io.observe($("#photoHeart"));
+      phase = "cake";
+      $("#micHint").hidden = false;
+      micReady.then((ok) => armFallback(ok ? undefined : 3000));
+    }, 600);
   }
 
   $("#gift").addEventListener("click", openGift);
   $("#blowBtn").addEventListener("click", blowCandles);
-  $("#cake").addEventListener("click", blowCandles);
-  $("#micBtn").addEventListener("click", () => (micStream ? stopMic() : startMic()));
-  $("#musicBtn").addEventListener("click", () => (musicOn ? stopMusic() : startMusic()));
+  $("#musicBtn").addEventListener("click", toggleMusic);
   $("#lightbox").addEventListener("click", () => ($("#lightbox").hidden = true));
   document.addEventListener("keydown", (e) => e.key === "Escape" && ($("#lightbox").hidden = true));
-  addEventListener("resize", sizePhotos);
+  addEventListener("resize", () => {
+    fitCake();
+    sizePhotos();
+  });
 })();
