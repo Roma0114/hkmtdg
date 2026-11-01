@@ -3,12 +3,12 @@
 GitHub Pages'te yayınlanan, kaotik bir doğum günü sayfası.
 
 - 🎁 "AÇMA." yazan, titreyen bir hediye kutusu
-- 👑 Sahnede taçlı Hikmet (kafası fotoğraf, gövdesi çizgi film) tek başına dans ediyor
+- 👑 Sahnede taçlı Hikmet (kafası fotoğraf, gövdesi çizgi film) sakince sallanıyor
 - 📱 Tek ekran, kaydırma yok, başta ses yok
 - 🎂 Mumlar **sadece mikrofona üfleyerek** sönüyor; üfleyemezse birkaç saniye sonra "sanırım nefesin yetmedi, tuşa basarak üfle" butonu çıkıyor
 - 💃 Üfleyince pasta patlıyor, kızlar iki yandan içeri giriyor, ekran toz pembe oluyor, şarkı (22.–59. saniyeler) çalıyor
 - 🎤 Kızlar şarkının vuruşlarına göre koreografi yapıyor: sağ-sol adım, ortak hareketler, dalga, diziliş değişimi
-- 👋 Şarkı bitince "gidiyoruz biz" deyip çıkıyorlar
+- 💋 Şarkı bitince diğerleri "doğum günün kutlu olsun Hikmet" deyip çıkıyor, iki kız Hikmet'i öpüp gidiyor ("muaaaaaaahh", "mcuk")
 - 💖 Pastanın yerinde kalp şeklinde fotoğraflar
 - 🐱 Ekranı koşup geçen kediler, kenarlarda dans eden kediler
 - 🎊 İki yandan konfeti, havai fişek, emoji yağmuru
@@ -31,7 +31,7 @@ GitHub Pages'te yayınlanan, kaotik bir doğum günü sayfası.
 ### Şarkı
 `music/tozpembe.mp3`, orijinal şarkının 22.–59. saniyeleri kesilerek hazırlandı (37 sn).
 Başka bir aralık istersen `songStart` / `songEnd` ile dosyanın içinde başlangıç ve bitiş saniyesini ayarlayabilirsin.
-Kızların vedası `goodbye` alanında. Not: repo herkese açık olduğu için mp3 dosyası da indirilebilir.
+Veda sözleri `goodbye`, `kissLeft`, `kissRight` alanlarında. Not: repo herkese açık olduğu için mp3 dosyası da indirilebilir.
 
 ### Kalp fotoğraflar
 `photos/` klasörüne `1.jpg`, `2.jpg`… şeklinde koy ve `photos` listesine ekle. Kare fotoğraflar en iyi durur.

@@ -21,8 +21,11 @@ window.BIRTHDAY = {
   songStart: 0,
   songEnd: null,
 
-  // Şarkı bitince kızların söyleyeceği söz
-  goodbye: "gidiyoruz biz 👋",
+  // Şarkı bitince: Hikmet'in solundaki kız ve sağdan 2. kız Hikmet'i öpüp gider,
+  // diğerleri kutlayarak çıkar ({name} yerine isim gelir)
+  goodbye: "doğum günün kutlu olsun {name} 🎉",
+  kissLeft: "muaaaaaaahh 💋",
+  kissRight: "mcuk 💋",
 
   // ---- Doğum günü olan kişi (ortadaki taçlı karakter) ----
   // img: fotoğraf yolu. pos: yüzün fotoğraftaki yeri ("yatay dikey").
@@ -43,6 +46,13 @@ window.BIRTHDAY = {
   // Pasta söndükten sonra kalp şeklinde çıkan fotoğraflar.
   // Az fotoğraf varsa kalbi doldurmak için tekrar edilir.
   photos: [
+    "photos/4.jpg",
+    "photos/5.jpg",
+    "photos/6.jpg",
+    "photos/7.jpg",
+    "photos/8.jpg",
+    "photos/9.jpg",
+    "photos/10.jpg",
     "photos/1.jpg",
     "photos/2.jpg",
     "photos/3.jpg",

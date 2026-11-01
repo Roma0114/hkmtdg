@@ -5,6 +5,7 @@
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const fmt = (text) => text.replaceAll("{name}", cfg.name || "");
 
   const COLORS = ["#ff6fa8", "#ffd166", "#7be0c3", "#7cc6ff", "#c39bff", "#ff9a6b"];
   const PINKS = ["#ff6fa8", "#ffc2da", "#ff9ccf", "#ffffff", "#ffd166"];
@@ -80,7 +81,9 @@
   //  Karakterler (kafası fotoğraf, gövdesi çizgi film)
   // ---------------------------------------------------------------
   const CREW_FACES = ["🤩", "😍", "🥳", "😎", "💃", "🌸"];
-  const MOVES = ["m-spin", "m-jump", "m-flip", "m-shake", "m-grow", "m-squash"];
+  const MOVES = ["m-spin", "m-jump", "m-sway", "m-shake", "m-grow", "m-squash", "m-nod"];
+  // Hikmet sakin: dönmek, takla atmak yok
+  const HERO_MOVES = ["m-squash", "m-nod", "m-shake"];
   let heroEl = null;
   const crewEls = [];
 
@@ -144,7 +147,7 @@
       showEmoji();
     }
 
-    el.addEventListener("click", () => doMove(el));
+    el.addEventListener("click", () => doMove(el, pick(hero ? HERO_MOVES : MOVES)));
     return el;
   }
 
@@ -221,11 +224,10 @@
   }
 
   function startAmbient() {
-    // Hikmet kendi kendine dans eder (konserde sahne kızların, kafa büyütmek yok)
+    // Hikmet arada bir küçük bir hareket yapar, o kadar
     setInterval(() => {
-      if (Math.random() > 0.45) return;
-      doMove(heroEl, phase === "concert" ? pick(["m-jump", "m-squash", "m-shake"]) : undefined);
-    }, 1500);
+      if (phase !== "end" && Math.random() < 0.3) doMove(heroEl, pick(HERO_MOVES));
+    }, 4000);
     // Arada bir kedi ekranı koşarak geçsin
     (async function dashLoop() {
       for (;;) {
@@ -360,7 +362,7 @@
   // ---------------------------------------------------------------
   //  Konser: şarkı + koreografi + toz pembe ekran
   // ---------------------------------------------------------------
-  const CHOREO = ["m-jump", "m-squash", "m-spin", "m-shake", "m-flip", "m-grow"];
+  const CHOREO = ["m-jump", "m-squash", "m-spin", "m-sway", "m-shake", "m-grow"];
   let beatCount = 0;
   let formation = 0;
 
@@ -377,7 +379,6 @@
       ch.style.marginLeft = `${step}px`; // sağ-sol adım
       restartClass(ch, "beat");
     });
-    restartClass(heroEl, "beat");
     restartClass($("#title"), "beat");
     restartClass($("#photoHeart"), "beat");
 
@@ -410,31 +411,81 @@
     playSong();
   }
 
-  // Şarkı bitince kızlar vedalaşıp çıkar
+  // Soldakiler sola, sağdakiler sağa yürüyüp çıkar
+  function leave(ch) {
+    ch.classList.add("leaving");
+    ch.style.left = parseFloat(ch.style.left) < 50 ? "-25%" : "125%";
+  }
+
+  // Kız Hikmet'in yanına gelip yanağından öper
+  async function kiss(ch, side, text) {
+    if (!ch) return;
+    ch.classList.remove("back");
+    ch.classList.add("kissing");
+    // Hikmet'in tam yanına gelsin: iki kafa yan yana, hafif üst üste
+    const gap = (heroEl.offsetWidth + ch.offsetWidth) / 2 - 14;
+    const pct = (gap / $("#stage").clientWidth) * 100;
+    ch.style.left = `${side === "left" ? 50 - pct : 50 + pct}%`;
+    await sleep(1000);
+    ch.classList.add(side === "left" ? "kiss-l" : "kiss-r");
+    say(ch, text, 1900);
+
+    const mark = document.createElement("span");
+    mark.className = `kiss-mark kiss-${side}`;
+    mark.textContent = "💋";
+    heroEl.querySelector(".char-head").appendChild(mark);
+    heroEl.classList.add("blush");
+    doMove(heroEl, "m-nod");
+
+    const r = heroEl.querySelector(".char-head").getBoundingClientRect();
+    fire({
+      particleCount: 18,
+      spread: 70,
+      startVelocity: 18,
+      gravity: 0.4,
+      origin: { x: (r.left + r.width / 2) / innerWidth, y: r.top / innerHeight },
+      shapes: emojiShapes.length ? [emojiShapes[1]] : undefined,
+      scalar: 1.5,
+    });
+    await sleep(1500);
+    ch.classList.remove("kiss-l", "kiss-r");
+  }
+
+  // Şarkı bitince: ikisi Hikmet'i öper, diğerleri kutlayıp çıkar
   async function finishConcert() {
     if (phase !== "concert") return;
     phase = "end";
     clearInterval(beatTimer);
     $("#musicBtn").hidden = true;
+    setFormation(0);
     crewEls.forEach((ch) => (ch.style.marginLeft = "0px"));
     sideCannons(1200, PINKS);
+    await sleep(1300); // ilk dizilişe dönsünler
 
-    const order = shuffle(crewEls);
-    order.forEach((ch, i) => setTimeout(() => say(ch, cfg.goodbye || "gidiyoruz biz 👋", 2600), i * 150));
-    await sleep(2600);
+    const byX = [...crewEls].sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
+    const leftOfHero = byX.filter((ch) => parseFloat(ch.style.left) < 50).pop();
+    const secondFromRight = byX[byX.length - 2];
+    const kissers = [leftOfHero, secondFromRight];
+    const others = crewEls.filter((ch) => !kissers.includes(ch));
 
-    // Soldakiler sola, sağdakiler sağa yürüyüp çıkar
-    crewEls.forEach((ch, i) => {
-      const toLeft = parseFloat(ch.style.left) < 50;
-      setTimeout(() => {
-        ch.classList.add("leaving");
-        ch.style.left = toLeft ? "-25%" : "125%";
-      }, i * 120);
-    });
-    await sleep(2400);
+    // Diğerleri sırayla kutlayıp hemen çıkar (balonlar üst üste binmesin)
+    const goodbye = fmt(cfg.goodbye || "doğum günün kutlu olsun {name} 🎉");
+    for (const ch of others) {
+      say(ch, goodbye, 1700);
+      setTimeout(() => leave(ch), 1700);
+      await sleep(750);
+    }
+    await sleep(1100);
+
+    await kiss(leftOfHero, "left", cfg.kissLeft || "muaaaaaaahh 💋");
+    await kiss(secondFromRight, "right", cfg.kissRight || "mcuk 💋");
+    kissers.forEach((ch) => ch && leave(ch));
+
+    await sleep(2300);
     crewEls.forEach((ch) => ch.remove());
     crewEls.length = 0;
     document.body.classList.remove("concert");
+    say(heroEl, "🥰", 3000);
   }
 
   // ---------------------------------------------------------------
