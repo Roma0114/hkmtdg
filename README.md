@@ -3,15 +3,15 @@
 GitHub Pages'te yayınlanan, kaotik bir doğum günü sayfası.
 
 - 🎁 "AÇMA." yazan, titreyen bir hediye kutusu
-- 🤪 Kafası fotoğraf, gövdesi çizgi film olan karakterler: dans ediyor, takla atıyor, kafaları büyüyor, konuşma balonlarıyla saçmalıyor
-- 👑 Ortada taçlı doğum günü insanı ("ne oluyor burada 😐")
-- 📱 Tek ekran, kaydırma yok
-- 🎂 Şaka mumlar, **sadece mikrofona üfleyerek** söndürülüyor: ilk üflemede kendi kendine yanıyor, ikincide pasta patlıyor
-- 😮‍💨 Üfleyemezse birkaç saniye sonra "sanırım nefesin yetmedi, tuşa basarak üfle" butonu çıkıyor
-- 🎤 Pasta patlayınca konser: ekran toz pembe oluyor, spot ışıkları yanıyor, 3-2-1 sonrası şarkı çalıyor, kızlar şarkının ritmine göre koreografi yapıyor
+- 👑 Sahnede taçlı Hikmet (kafası fotoğraf, gövdesi çizgi film) tek başına dans ediyor
+- 📱 Tek ekran, kaydırma yok, başta ses yok
+- 🎂 Mumlar **sadece mikrofona üfleyerek** sönüyor; üfleyemezse birkaç saniye sonra "sanırım nefesin yetmedi, tuşa basarak üfle" butonu çıkıyor
+- 💃 Üfleyince pasta patlıyor, kızlar iki yandan içeri giriyor, ekran toz pembe oluyor, şarkı (22.–59. saniyeler) çalıyor
+- 🎤 Kızlar şarkının vuruşlarına göre koreografi yapıyor: sağ-sol adım, ortak hareketler, dalga, diziliş değişimi
+- 👋 Şarkı bitince "gidiyoruz biz" deyip çıkıyorlar
 - 💖 Pastanın yerinde kalp şeklinde fotoğraflar
-- 🐱 Ekranı çığlık atarak koşup geçen kediler, kenarlarda dans eden kediler
-- 🎊 İki yandan konfeti, havai fişek, emoji yağmuru, ekran sarsıntısı
+- 🐱 Ekranı koşup geçen kediler, kenarlarda dans eden kediler
+- 🎊 İki yandan konfeti, havai fişek, emoji yağmuru
 
 ## Kişiselleştirme (`config.js`)
 
@@ -28,12 +28,10 @@ GitHub Pages'te yayınlanan, kaotik bir doğum günü sayfası.
 - `toon: true` yüzlere çizgi film gibi sert renkler verir. İstemezsen `false` yap.
 - Dosya adları büyük/küçük harfe duyarlıdır: `1.JPG` ile `1.jpg` aynı değildir.
 
-### Konser şarkısı
-Şarkıyı `music/tozpembe.mp3` adıyla koy. Nakarattan başlasın istersen `songStart` değerini saniye olarak yaz (ör. `45`).
-Dosya yoksa konser 8-bit melodiyle yapılır. Not: repo herkese açık olduğu için mp3 dosyası da herkes tarafından indirilebilir.
-
-### Konuşmalar
-`intro`, `crewLines`, `heroLines`, `trickLines`, `boomLines`, `concertIntro`, `concertLines`, `concertHeroLines` listelerini istediğin gibi değiştir. `{name}` yazan yere isim gelir.
+### Şarkı
+`music/tozpembe.mp3`, orijinal şarkının 22.–59. saniyeleri kesilerek hazırlandı (37 sn).
+Başka bir aralık istersen `songStart` / `songEnd` ile dosyanın içinde başlangıç ve bitiş saniyesini ayarlayabilirsin.
+Kızların vedası `goodbye` alanında. Not: repo herkese açık olduğu için mp3 dosyası da indirilebilir.
 
 ### Kalp fotoğraflar
 `photos/` klasörüne `1.jpg`, `2.jpg`… şeklinde koy ve `photos` listesine ekle. Kare fotoğraflar en iyi durur.
