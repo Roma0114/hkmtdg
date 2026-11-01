@@ -1,8 +1,8 @@
-# 🎂 AÇMA.
+# 🎂 Doğum Günün Kutlu Olsun
 
 GitHub Pages'te yayınlanan, kaotik bir doğum günü sayfası.
 
-- 🎁 "AÇMA." yazan, titreyen bir hediye kutusu
+- 🎁 "Doğum günün kutlu olsun yakışıklı, aç bakalım" yazan, titreyen bir hediye kutusu
 - 👑 Sahnede taçlı Hikmet (kafası fotoğraf, gövdesi çizgi film) sakince sallanıyor
 - 📱 Tek ekran, kaydırma yok, başta ses yok
 - 🎂 Mumlar **sadece mikrofona üfleyerek** sönüyor; üfleyemezse birkaç saniye sonra "sanırım nefesin yetmedi, tuşa basarak üfle" butonu çıkıyor
